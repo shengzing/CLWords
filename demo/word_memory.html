@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单词记忆助手</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #f0f4ff;
+      --surface: #ffffff;
+      --surface2: #f8f9ff;
+      --indigo: #4f46e5;
+      --indigo-light: #818cf8;
+      --indigo-pale: #eef2ff;
+      --teal: #0d9488;
+      --teal-light: #2dd4bf;
+      --teal-pale: #f0fdfa;
+      --amber: #d97706;
+      --amber-pale: #fffbeb;
+      --text: #1e1b4b;
+      --text2: #475569;
+      --muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-indigo: #c7d2fe;
+      --border-teal: #99f6e4;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 4px 16px rgba(79,70,229,0.09), 0 1px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 20px 50px rgba(79,70,229,0.15), 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── 顶部装饰带 ── */
+    .hero {
+      background: linear-gradient(135deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%);
+      padding: 36px 20px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #c7d2fe;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      position: relative;
+    }
+    .hero p {
+      margin-top: 8px;
+      color: #c7d2fe;
+      font-size: 15px;
+      position: relative;
+    }
+
+    /* ── 搜索区域 ── */
+    .search-wrap {
+      max-width: 680px;
+      margin: -22px auto 0;
+      padding: 0 16px;
+      position: relative;
+      z-index: 10;
+    }
+    .search-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 14px 14px 12px;
+      border: 1px solid var(--border);
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .input-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 17px;
+      pointer-events: none;
+    }
+    input[type="text"] {
+      width: 100%;
+      height: 46px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px 0 38px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface2);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+      background: #fff;
+    }
+    .btn-primary {
+      height: 46px;
+      border: none;
+      border-radius: 10px;
+      padding: 0 22px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--indigo), #7c3aed);
+      box-shadow: 0 4px 12px rgba(79,70,229,0.35);
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .search-tips {
+      margin-top: 9px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .search-tips strong { color: var(--indigo); }
+
+    /* ── 主内容区 ── */
+    .main {
+      width: 100%;
+      max-width: none;
+      margin: 28px 0 40px;
+      padding: 0 24px;
+    }
+
+    /* ── 当前单词标题条 ── */
+    .word-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .word-bar .word-en {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: var(--text);
+    }
+    .word-bar .word-badge {
+      background: var(--indigo-pale);
+      color: var(--indigo);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    /* ── 思维导图区 ── */
+    .mindmap-card {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 28px 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .mindmap-stage {
+      position: relative;
+      min-height: 280px;
+      display: grid;
+      grid-template-columns: 1fr 180px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* SVG 线条层 */
+    .mindmap-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .line-left { stroke: var(--indigo-light); }
+    .line-right { stroke: var(--teal-light); }
+
+    /* 中心节点 */
+    .center-node {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--indigo), #7c3aed);
+      box-shadow: 0 0 0 10px rgba(79,70,229,0.08), 0 12px 36px rgba(79,70,229,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px;
+      justify-self: center;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 10px rgba(79,70,229,0.08), 0 12px 36px rgba(79,70,229,0.3); }
+      50%       { box-shadow: 0 0 0 16px rgba(79,70,229,0.12), 0 16px 44px rgba(79,70,229,0.35); }
+    }
+    .center-node .cn-word {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+    .center-node .cn-label {
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.75);
+      font-weight: 500;
+    }
+
+    /* 分支容器 */
+    .branch {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .branch.left { align-items: flex-end; }
+    .branch.right { align-items: flex-start; }
+
+    /* 节点卡片 */
+    .mnode {
+      padding: 9px 13px;
+      border-radius: 12px;
+      max-width: 220px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      transition: transform 0.18s, box-shadow 0.18s;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .mnode:hover { transform: translateY(-2px); }
+    .mnode:focus-visible {
+      outline: 2px solid var(--indigo);
+      outline-offset: 2px;
+    }
+    .mnode.active {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 2px rgba(79,70,229,0.18), 0 6px 16px rgba(79,70,229,0.15);
+    }
+    .mnode.expanded {
+      box-shadow: 0 0 0 2px rgba(13,148,136,0.18), 0 8px 18px rgba(13,148,136,0.14);
+    }
+    .mnode-head {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 13px;
+    }
+
+    /* 左侧蓝紫色系 */
+    .mnode.l-head {
+      background: var(--indigo-pale);
+      border: 1.5px solid var(--border-indigo);
+      color: var(--indigo);
+    }
+    .mnode.l-node {
+      background: #fff;
+      border: 1.5px solid var(--border-indigo);
+      color: var(--text);
+      box-shadow: 0 2px 10px rgba(79,70,229,0.08);
+    }
+    .mnode.l-node strong { color: var(--indigo); }
+
+    /* 右侧青绿色系 */
+    .mnode.r-head {
+      background: var(--teal-pale);
+      border: 1.5px solid var(--border-teal);
+      color: var(--teal);
+    }
+    .mnode.r-node {
+      background: #fff;
+      border: 1.5px solid var(--border-teal);
+      color: var(--text);
+      box-shadow: 0 2px 10px rgba(13,148,136,0.07);
+    }
+    .mnode.r-node strong { color: var(--teal); }
+
+    /* 节点标签小徽章 */
+    .tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 99px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .tag-prefix { background: #e0e7ff; color: #4338ca; }
+    .tag-root   { background: #dbeafe; color: #1d4ed8; }
+    .tag-suffix { background: #ede9fe; color: #6d28d9; }
+    .tag-mean   { background: #d1fae5; color: #065f46; }
+    .tag-tip    { background: #fef3c7; color: #92400e; }
+
+    .node-children {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+      margin-top: 0;
+      border-top: 1px dashed var(--border);
+      color: var(--text2);
+      font-size: 12.5px;
+    }
+    .mnode.expanded .node-children {
+      max-height: 220px;
+      opacity: 1;
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+    .node-children-title {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .node-children ul {
+      margin: 0;
+      padding-left: 16px;
+      line-height: 1.5;
+    }
+
+    /* ── 明细区 ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .detail-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .detail-header.left-h { background: var(--indigo-pale); color: var(--indigo); border-bottom: 1px solid var(--border-indigo); }
+    .detail-header.right-h { background: var(--teal-pale); color: var(--teal); border-bottom: 1px solid var(--border-teal); }
+    .detail-header .icon { font-size: 16px; }
+    .detail-body { padding: 14px 16px; }
+    .detail-body ul { padding-left: 0; list-style: none; }
+    .detail-body li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+      line-height: 1.6;
+    }
+    .detail-body li:last-child { border-bottom: none; }
+    .detail-body li strong { color: var(--text); }
+
+    /* ── 空状态 ── */
+    .empty {
+      color: var(--muted);
+      font-size: 14px;
+      padding: 10px 0;
+    }
+
+    .expand-panel {
+      margin-top: 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .expand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .expand-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .expand-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text2);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── 动画 ── */
+    .fade-in {
+      animation: fadeInUp 0.35s ease both;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 页脚 ── */
+    .footer {
+      text-align: center;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    /* ── 移动端 ── */
+    @media (max-width: 680px) {
+      .main { padding: 0 12px; }
+      .mindmap-stage {
+        grid-template-columns: 1fr;
+        min-height: unset;
+      }
+      .branch.left, .branch.right { align-items: flex-start; }
+      .center-node { justify-self: start; margin-bottom: 8px; }
+      .mnode { max-width: 100%; }
+      .mindmap-svg { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 顶部 Hero -->
+<header class="hero">
+  <div class="hero-badge">单词记忆助手</div>
+  <h1>词根词缀 × 含义联想</h1>
+  <p>输入一个单词，用思维导图拆解记忆路径</p>
+</header>
+
+<!-- 搜索框（浮在 hero 下方） -->
+<div class="search-wrap">
+  <div class="search-box">
+    <div class="input-row">
+      <div class="input-wrap">
+        <span class="input-icon">🔍</span>
+        <input id="wordInput" type="text" value="context"
+          placeholder="输入英文单词，例如 transport / predict" autocomplete="off" spellcheck="false" />
+      </div>
+      <button class="btn-primary" id="analyzeBtn">分析</button>
+    </div>
+    <p class="search-tips">默认示例：<strong>context</strong> · 支持回车触发分析</p>
+  </div>
+</div>
+
+<!-- 主内容 -->
+<main class="main">
+
+  <!-- 单词标题条 -->
+  <div class="word-bar" id="wordBar" style="display:none">
+    <span class="word-en" id="wordTitle"></span>
+    <span class="word-badge">思维导图</span>
+  </div>
+
+  <!-- 思维导图卡片 -->
+  <section class="mindmap-card" id="mindmapCard">
+    <div class="section-label">MIND MAP — 记忆导图</div>
+    <div class="mindmap-stage" id="mindmapStage">
+      <p class="empty">输入单词后自动生成...</p>
+    </div>
+    <div class="expand-panel" id="expandPanel">
+      <div class="expand-title">节点联想扩展区</div>
+      <div class="expand-sub">点击左右任意节点，展开更深层的记忆线索。</div>
+      <p class="empty">等待你点击节点...</p>
+    </div>
+  </section>
+
+  <!-- 明细区 -->
+  <div class="detail-grid">
+    <div class="detail-card">
+      <div class="detail-header left-h">
+        <span class="icon">🧩</span> 词根词缀 · 拆解明细
+      </div>
+      <div class="detail-body" id="morphResult">
+        <p class="empty">等待分析...</p>
+      </div>
+    </div>
+    <div class="detail-card">
+      <div class="detail-header right-h">
+        <span class="icon">💡</span> 含义联想 · 记忆明细
+      </div>
+      <div class="detail-body" id="meaningResult">
+        <p class="empty">等待分析...</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer">启发式记忆工具，辅助快速记忆，并非严格词源学分析</p>
+</main>
+
+<script>
+/* ───── 数据库 ───── */
+const PREFIXES = [
+  { part: "un",    zh: "否定，不",       cue: "把意思反过来" },
+  { part: "in",    zh: "不，向内",       cue: "否定或进入" },
+  { part: "im",    zh: "不，向内",       cue: "in 的变体，用在 b/m/p 前" },
+  { part: "dis",   zh: "否定，分开",     cue: "反向、分离" },
+  { part: "re",    zh: "再次，向后",     cue: "重复做一次" },
+  { part: "pre",   zh: "在前，预先",     cue: "提前发生" },
+  { part: "pro",   zh: "向前，支持",     cue: "推进、赞成" },
+  { part: "sub",   zh: "在下，次级",     cue: "层级更低或次级" },
+  { part: "trans", zh: "跨越，转换",     cue: "从 A 到 B" },
+  { part: "inter", zh: "在……之间",       cue: "多个对象之间" },
+  { part: "anti",  zh: "反对，抗",       cue: "和目标对着来" },
+  { part: "con",   zh: "共同，一起",     cue: "强调连接或共同" },
+  { part: "ex",    zh: "向外，曾经",     cue: "往外走或表示过去身份" },
+  { part: "de",    zh: "向下，否定",     cue: "撤销或强调下降" },
+  { part: "over",  zh: "超过，过度",     cue: "多于正常" },
+  { part: "under", zh: "在下，不足",     cue: "少于正常" },
+  { part: "mis",   zh: "错误",           cue: "做错了" },
+  { part: "out",   zh: "超出，外面",     cue: "超越或在外部" },
+];
+
+const SUFFIXES = [
+  { part: "tion",  zh: "名词（行为/结果）", cue: "把动作变成名词" },
+  { part: "sion",  zh: "名词",             cue: "行为或状态名词" },
+  { part: "ment",  zh: "名词",             cue: "结果、状态" },
+  { part: "ness",  zh: "名词",             cue: "性质、状态" },
+  { part: "ity",   zh: "名词",             cue: "抽象性质" },
+  { part: "able",  zh: "可……的",           cue: "能够被..." },
+  { part: "ible",  zh: "可……的",           cue: "able 的变体" },
+  { part: "ful",   zh: "充满……的",         cue: "装满了某种性质" },
+  { part: "less",  zh: "没有……的",         cue: "缺少某物" },
+  { part: "ous",   zh: "……的",             cue: "形容词后缀" },
+  { part: "ive",   zh: "……的，倾向于",     cue: "形容词后缀" },
+  { part: "er",    zh: "人/物（执行者）",  cue: "做某事的人或物" },
+  { part: "ist",   zh: "……者",             cue: "某领域的人" },
+  { part: "ize",   zh: "使……化",           cue: "动词后缀" },
+  { part: "ify",   zh: "使……化",           cue: "动词后缀" },
+  { part: "ly",    zh: "副词后缀",         cue: "描述方式或程度" },
+  { part: "al",    zh: "形容词/名词后缀",  cue: "与……有关的" },
+  { part: "ic",    zh: "形容词后缀",       cue: "具有……性质的" },
+];
+
+const ROOTS = [
+  { part: "port",  zh: "搬运，携带",   sample: "transport, import, export" },
+  { part: "dict",  zh: "说",           sample: "predict, dictionary, dictate" },
+  { part: "vis",   zh: "看",           sample: "visible, vision, revise" },
+  { part: "spect", zh: "看",           sample: "inspect, respect, spectacle" },
+  { part: "tract", zh: "拉，拖",       sample: "attract, contract, subtract" },
+  { part: "scrib", zh: "写",           sample: "describe, prescribe" },
+  { part: "press", zh: "压",           sample: "compress, express, pressure" },
+  { part: "ject",  zh: "投掷",         sample: "project, reject, inject" },
+  { part: "form",  zh: "形状，形成",   sample: "transform, uniform, reform" },
+  { part: "rupt",  zh: "破裂",         sample: "interrupt, erupt, disrupt" },
+  { part: "ceed",  zh: "走，前进",     sample: "proceed, succeed, exceed" },
+  { part: "gress", zh: "走，前进",     sample: "progress, regress, congress" },
+  { part: "text",  zh: "编织，文本",   sample: "text, textile, context, texture" },
+  { part: "struct", zh: "建造",        sample: "construct, destroy, instruct" },
+  { part: "duc",   zh: "引导，带领",   sample: "produce, conduct, educate" },
+  { part: "pos",   zh: "放置",         sample: "position, compose, deposit" },
+  { part: "mit",   zh: "发送，让",     sample: "submit, permit, commit" },
+  { part: "ven",   zh: "来",           sample: "prevent, event, convention" },
+  { part: "cap",   zh: "抓，拿",       sample: "capture, accept, capable" },
+  { part: "fac",   zh: "做，制造",     sample: "factory, factor, manufacture" },
+];
+
+const WORD_DB = {
+  context:   { zh: "上下文，语境", scene: "阅读英文文章时，\"context\" 帮你猜出生词的意思。", memory: "con（一起）+ text（文本）→ 把前后文本连在一起 → 语境" },
+  transport: { zh: "运输，运送",   scene: "货物通过铁路 transport 到达各地。", memory: "trans（跨越）+ port（携带）→ 跨越距离搬运 → 运输" },
+  predict:   { zh: "预测，预言",   scene: "气象学家 predict 明天会下雨。", memory: "pre（提前）+ dict（说）→ 提前说出 → 预测" },
+  invisible: { zh: "看不见的",     scene: "隐身斗篷让哈利·波特变得 invisible。", memory: "in（不）+ vis（看）+ ible（可以）→ 不可被看见 → 隐形" },
+  inspect:   { zh: "检查，审视",   scene: "质检员 inspect 每一件产品。", memory: "in（向内）+ spect（看）→ 仔细往里看 → 检查" },
+  reject:    { zh: "拒绝，驳回",   scene: "申请被公司 reject 了。", memory: "re（往回）+ ject（扔）→ 把东西扔回去 → 拒绝" },
+  progress:  { zh: "进步，进展",   scene: "项目的 progress 让团队信心大增。", memory: "pro（向前）+ gress（走）→ 一直往前走 → 进步" },
+  transform: { zh: "转变，改造",   scene: "毛毛虫 transform 为蝴蝶。", memory: "trans（跨越）+ form（形态）→ 形态跨越变化 → 转变" },
+  construct: { zh: "建造，构建",   scene: "工人们 construct 一座大桥。", memory: "con（一起）+ struct（建造）→ 一起搭建 → 构建" },
+  permit:    { zh: "允许，许可",   scene: "需要 permit 才能进入该区域。", memory: "per（完全）+ mit（发送/让）→ 完全放行 → 允许" },
+};
+
+const ROOT_FAMILY = {
+  text: ["context", "text", "textbook", "texture", "textile"],
+  port: ["transport", "import", "export", "portable"],
+  dict: ["predict", "dictionary", "dictate", "verdict"],
+  spect: ["inspect", "respect", "spectator", "spectacle"],
+  struct: ["construct", "structure", "instruction", "destruction"]
+};
+
+/* ───── 分析逻辑 ───── */
+function analyzeWord(raw) {
+  const word = raw.toLowerCase().trim();
+  let remain = word;
+  const hits = [];
+
+  const prefix = PREFIXES
+    .filter(p => remain.startsWith(p.part))
+    .sort((a, b) => b.part.length - a.part.length)[0];
+  if (prefix) {
+    hits.push({ type: "前缀", ...prefix });
+    remain = remain.slice(prefix.part.length);
+  }
+
+  const suffix = SUFFIXES
+    .filter(s => remain.endsWith(s.part))
+    .sort((a, b) => b.part.length - a.part.length)[0];
+  if (suffix) {
+    hits.push({ type: "后缀", ...suffix });
+  }
+
+  ROOTS
+    .filter(r => word.includes(r.part))
+    .sort((a, b) => b.part.length - a.part.length)
+    .forEach(r => hits.push({ type: "词根", ...r }));
+
+  const info = WORD_DB[word] || {
+    zh: "—",
+    scene: `在实际句子中理解 "${word}" 的含义，结合发音辅助记忆。`,
+    memory: hits.length
+      ? hits.filter(h => h.type !== "后缀").map(h => `${h.part}（${h.zh}）`).join(" + ") + ` → ${word}`
+      : `根据发音/语境记忆 "${word}"`
+  };
+
+  return { word, hits, info };
+}
+
+/* ───── 思维导图渲染 ───── */
+function renderMindmap({ word, hits, info }) {
+  const stage = document.getElementById("mindmapStage");
+
+  const prefixH = hits.find(h => h.type === "前缀");
+  const rootH   = hits.filter(h => h.type === "词根").slice(0, 2);
+  const suffixH = hits.find(h => h.type === "后缀");
+
+  /* 左侧节点 */
+  const leftNodes = [];
+  leftNodes.push(`<div class="mnode mnode-head l-head" data-expand-key="left-overview" data-subnode="0" tabindex="0">🧩 词根词缀</div>`);
+  if (prefixH) leftNodes.push(`<div class="mnode l-node" data-expand-key="prefix:${prefixH.part}" data-subnode="1" tabindex="0"><span class="tag tag-prefix">前缀</span><strong>${prefixH.part}</strong>：${prefixH.zh}<br><small style="color:var(--muted)">${prefixH.cue}</small></div>`);
+  rootH.forEach(r => leftNodes.push(`<div class="mnode l-node" data-expand-key="root:${r.part}" data-subnode="1" tabindex="0"><span class="tag tag-root">词根</span><strong>${r.part}</strong>：${r.zh}<br><small style="color:var(--muted)">如：${r.sample}</small></div>`));
+  if (suffixH) leftNodes.push(`<div class="mnode l-node" data-expand-key="suffix:${suffixH.part}" data-subnode="1" tabindex="0"><span class="tag tag-suffix">后缀</span><strong>${suffixH.part}</strong>：${suffixH.zh}</div>`);
+  if (!prefixH && rootH.length === 0 && !suffixH) {
+    leftNodes.push(`<div class="mnode l-node" data-expand-key="left-fallback" data-subnode="1" tabindex="0" style="color:var(--muted)">未识别常见词根词缀，可结合发音记忆</div>`);
+  }
+
+  /* 右侧节点 */
+  const rightNodes = [
+    `<div class="mnode mnode-head r-head" data-expand-key="right-overview" data-subnode="0" tabindex="0">💡 含义联想</div>`,
+    `<div class="mnode r-node" data-expand-key="meaning" data-subnode="1" tabindex="0"><span class="tag tag-mean">含义</span><strong>${info.zh}</strong></div>`,
+    `<div class="mnode r-node" data-expand-key="memory" data-subnode="1" tabindex="0"><span class="tag tag-tip">联想</span>${info.memory}</div>`,
+    `<div class="mnode r-node" data-expand-key="scene" data-subnode="1" tabindex="0"><span class="tag tag-tip">场景</span>${info.scene}</div>`,
+    `<div class="mnode r-node" data-expand-key="review" data-subnode="1" tabindex="0" style="color:var(--muted);font-size:12.5px">复习节奏：30 min → 当晚 → 次日 → 一周后</div>`,
+  ];
+
+  stage.innerHTML = `
+    <svg class="mindmap-svg" id="mindmapSvg"></svg>
+    <div class="branch left fade-in" id="branchLeft">${leftNodes.join("")}</div>
+    <div class="center-node fade-in" id="centerNode">
+      <div class="cn-word">${word}</div>
+      <div class="cn-label">记忆中心</div>
+    </div>
+    <div class="branch right fade-in" id="branchRight">${rightNodes.join("")}</div>
+  `;
+
+  /* 延迟画线，等 DOM 布局稳定 */
+  requestAnimationFrame(() => drawLines());
+  bindNodeExpansion({ word, hits, info });
+}
+
+function drawLines() {
+  const svg = document.getElementById("mindmapSvg");
+  const center = document.getElementById("centerNode");
+  const leftNodes  = document.querySelectorAll("#branchLeft .mnode");
+  const rightNodes = document.querySelectorAll("#branchRight .mnode");
+  if (!svg || !center) return;
+
+  svg.innerHTML = "";
+  const stageRect  = svg.getBoundingClientRect();
+  const centerRect = center.getBoundingClientRect();
+  const cx = centerRect.left + centerRect.width  / 2 - stageRect.left;
+  const cy = centerRect.top  + centerRect.height / 2 - stageRect.top;
+
+  function drawCurve(nodeEl, isLeft) {
+    const r = nodeEl.getBoundingClientRect();
+    const nx = r.left + (isLeft ? r.width : 0) - stageRect.left;
+    const ny = r.top  + r.height / 2            - stageRect.top;
+    const mx = (cx + nx) / 2;
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${cx} ${cy} C ${mx} ${cy}, ${mx} ${ny}, ${nx} ${ny}`);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke-width", "1.8");
+    path.setAttribute("stroke-opacity", "0.5");
+    path.setAttribute("stroke-dasharray", "none");
+    path.classList.add(isLeft ? "line-left" : "line-right");
+    svg.appendChild(path);
+  }
+
+  leftNodes.forEach(n  => drawCurve(n, true));
+  rightNodes.forEach(n => drawCurve(n, false));
+}
+
+/* ───── 明细渲染 ───── */
+function renderMorph({ word, hits }) {
+  const box = document.getElementById("morphResult");
+  if (!hits.length) {
+    box.innerHTML = '<p class="empty">未识别到常见词根词缀，可尝试其他单词。</p>';
+    return;
+  }
+  const items = hits.map(h => {
+    const tagClass = h.type === "前缀" ? "tag-prefix" : h.type === "后缀" ? "tag-suffix" : "tag-root";
+    const extra = h.sample ? `<br><small style="color:var(--muted)">同族单词：${h.sample}</small>` : "";
+    return `<li><span class="tag ${tagClass}">${h.type}</span><strong>${h.part}</strong>：${h.zh}（${h.cue}）${extra}</li>`;
+  }).join("");
+  box.innerHTML = `<ul>${items}</ul>`;
+}
+
+function renderMeaning({ word, info }) {
+  const box = document.getElementById("meaningResult");
+  box.innerHTML = `
+    <ul>
+      <li><strong>核心含义：</strong>${info.zh}</li>
+      <li><strong>联想拆解：</strong>${info.memory}</li>
+      <li><strong>记忆场景：</strong>${info.scene}</li>
+      <li style="color:var(--muted);font-size:13px">复习建议：30 分钟后 → 当天晚上 → 第二天 → 一周后各回忆一次</li>
+    </ul>
+  `;
+}
+
+function renderExpansion(title, sub, items) {
+  const panel = document.getElementById("expandPanel");
+  const list = items.map(item => `<li>${item}</li>`).join("");
+  panel.innerHTML = `
+    <div class="expand-title">${title}</div>
+    <div class="expand-sub">${sub}</div>
+    <ul class="expand-list">${list}</ul>
+  `;
+}
+
+function getExpansionContent(key, data) {
+  const { word, hits, info } = data;
+  if (key === "left-overview") {
+    return {
+      title: "词根词缀路径：整体策略",
+      sub: "先拆结构，再还原词义。",
+      items: [
+        "先看前缀：判断方向、否定、时间等语义。",
+        "再抓词根：它通常承载核心含义。",
+        "最后看后缀：确认词性（名词/形容词/动词）。",
+        `应用到 "${word}"：优先记住“核心词根 + 场景”。`
+      ]
+    };
+  }
+  if (key === "right-overview") {
+    return {
+      title: "含义联想路径：整体策略",
+      sub: "把抽象词义变成脑海里的画面。",
+      items: [
+        "含义一句话：用中文讲清楚这个词在做什么。",
+        "场景一句话：把它放进你熟悉的生活或工作场景。",
+        "联想一句话：把词根拆解转成有故事感的句子。",
+        "复习节奏：30 分钟、当晚、次日、一周后。"
+      ]
+    };
+  }
+  if (key === "left-fallback") {
+    return {
+      title: "未识别词根词缀时怎么记",
+      sub: "这类词可用发音 + 场景双重记忆。",
+      items: [
+        "先确定中文核心含义，写成 5-8 字短句。",
+        "再造一个真实场景句，尽量带人物和动作。",
+        "最后读 3 遍发音，把声音和画面绑定。",
+        "第二天进行默写回忆，巩固长期记忆。"
+      ]
+    };
+  }
+  if (key.startsWith("prefix:")) {
+    const part = key.split(":")[1];
+    const p = PREFIXES.find(x => x.part === part);
+    const sibling = PREFIXES.filter(x => x.part !== part).slice(0, 3).map(x => x.part).join(" / ");
+    return {
+      title: `前缀 ${part} 的进一步联想`,
+      sub: p ? `核心语义：${p.zh}` : "常见前缀扩展",
+      items: [
+        p ? `记忆提示：${p.cue}` : "先判断该前缀是否有方向或否定意义。",
+        `同类前缀可对照记：${sibling}`,
+        `造句建议：用 "${part}" 开头再找两个词做并列记忆。`,
+        `回到 "${word}"：把前缀含义先说出来，再接词根解释。`
+      ]
+    };
+  }
+  if (key.startsWith("root:")) {
+    const part = key.split(":")[1];
+    const r = ROOTS.find(x => x.part === part);
+    const family = ROOT_FAMILY[part] || (r?.sample ? r.sample.split(",").map(s => s.trim()) : []);
+    return {
+      title: `词根 ${part} 的词族联想`,
+      sub: r ? `核心语义：${r.zh}` : "词根扩展",
+      items: [
+        `词族示例：${family.join(" / ") || "可补充更多同根词"}`,
+        `记忆方法：固定“词根 = ${r ? r.zh : "核心动作"}”这条映射。`,
+        "每天挑 2 个同根词做对比，速度会很快提升。",
+        `把 "${part}" 放回 "${word}" 再复述一遍完整词义。`
+      ]
+    };
+  }
+  if (key.startsWith("suffix:")) {
+    const part = key.split(":")[1];
+    const s = SUFFIXES.find(x => x.part === part);
+    return {
+      title: `后缀 ${part} 的词性联想`,
+      sub: s ? `常见作用：${s.zh}` : "后缀扩展",
+      items: [
+        s ? `记忆提示：${s.cue}` : "先看这个后缀偏向哪类词性。",
+        "后缀主要用于“确认词性”，不一定决定核心意义。",
+        "学习时可建立：后缀 -> 词性 的速查表。",
+        `在 "${word}" 中，先抓词根义，再用后缀确认词性。`
+      ]
+    };
+  }
+  if (key === "meaning") {
+    return {
+      title: "核心含义扩展",
+      sub: "把解释压缩成一个最小记忆单元。",
+      items: [
+        `核心释义：${info.zh}`,
+        "用“谁 + 做什么”改写成自己的口语句。",
+        `近义替换法：给 "${word}" 找 1-2 个中文近义词。`,
+        "复习时优先回忆这条最短释义。"
+      ]
+    };
+  }
+  if (key === "memory") {
+    return {
+      title: "联想句扩展",
+      sub: "把拆解结果变成可复述的故事。",
+      items: [
+        `当前联想：${info.memory}`,
+        "把联想改写成第一人称，更容易记住。",
+        "如果联想太长，保留“前缀 + 词根 + 结果”三段即可。",
+        `连续复述 3 次：看到 "${word}" -> 立刻说出联想。`
+      ]
+    };
+  }
+  if (key === "scene") {
+    return {
+      title: "场景句扩展",
+      sub: "让单词绑定具体生活画面。",
+      items: [
+        `当前场景：${info.scene}`,
+        "建议替换为你真实经历中的一个画面。",
+        "场景尽量包含时间、地点、动作三个元素。",
+        "越具体，记忆提取速度越快。"
+      ]
+    };
+  }
+  if (key === "review") {
+    return {
+      title: "复习节奏扩展",
+      sub: "利用间隔重复减少遗忘。",
+      items: [
+        "第 1 次：学习后 30 分钟，快速回忆。",
+        "第 2 次：当天晚上，不看答案复述。",
+        "第 3 次：第二天，写出词义和联想线索。",
+        "第 4 次：一周后，做一次小测。"
+      ]
+    };
+  }
+  return {
+    title: "联想扩展",
+    sub: "点击节点可查看对应的深度记忆内容。",
+    items: ["继续点击其它节点，形成多路径记忆。"]
+  };
+}
+
+function bindNodeExpansion(data) {
+  const nodes = document.querySelectorAll("#mindmapStage .mnode");
+  const collapseAllInline = () => {
+    nodes.forEach(n => {
+      n.classList.remove("expanded");
+      const child = n.querySelector(".node-children");
+      if (child) child.remove();
+    });
+  };
+
+  const mountInlineExpand = (node, content) => {
+    const child = document.createElement("div");
+    const shortItems = content.items.slice(0, 3).map(item => `<li>${item}</li>`).join("");
+    child.className = "node-children";
+    child.innerHTML = `
+      <div class="node-children-title">继续联想</div>
+      <ul>${shortItems}</ul>
+    `;
+    node.appendChild(child);
+    node.classList.add("expanded");
+  };
+
+  nodes.forEach(node => {
+    node.addEventListener("click", () => {
+      nodes.forEach(n => n.classList.remove("active"));
+      node.classList.add("active");
+      const key = node.dataset.expandKey || "";
+      const content = getExpansionContent(key, data);
+      renderExpansion(content.title, content.sub, content.items);
+
+      if (node.dataset.subnode === "1") {
+        const alreadyExpanded = node.classList.contains("expanded");
+        collapseAllInline();
+        if (!alreadyExpanded) {
+          mountInlineExpand(node, content);
+        }
+        requestAnimationFrame(() => drawLines());
+      } else {
+        collapseAllInline();
+        requestAnimationFrame(() => drawLines());
+      }
+    });
+    node.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        node.click();
+      }
+    });
+  });
+}
+
+/* ───── 入口 ───── */
+function run() {
+  const val = document.getElementById("wordInput").value.trim();
+  const bar = document.getElementById("wordBar");
+  const title = document.getElementById("wordTitle");
+  if (!val) return;
+
+  const data = analyzeWord(val);
+  title.textContent = data.word;
+  bar.style.display = "flex";
+
+  renderMindmap(data);
+  renderMorph(data);
+  renderMeaning(data);
+}
+
+document.getElementById("analyzeBtn").addEventListener("click", run);
+document.getElementById("wordInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") run();
+});
+
+window.addEventListener("resize", () => {
+  if (document.getElementById("mindmapSvg")) drawLines();
+});
+
+run();
+</script>
+</body>
+</html>
