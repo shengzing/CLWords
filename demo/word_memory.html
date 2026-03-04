@@ -360,28 +360,77 @@
       max-height: 0;
       opacity: 0;
       overflow: hidden;
-      transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+      transition: max-height 0.3s ease, opacity 0.25s ease, margin-top 0.2s ease;
       margin-top: 0;
       border-top: 1px dashed var(--border);
       color: var(--text2);
       font-size: 12.5px;
     }
     .mnode.expanded .node-children {
-      max-height: 220px;
+      max-height: 300px;
       opacity: 1;
       margin-top: 8px;
       padding-top: 8px;
     }
     .node-children-title {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
-      margin-bottom: 4px;
-      font-weight: 600;
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     .node-children ul {
       margin: 0;
       padding-left: 16px;
       line-height: 1.5;
+    }
+    /* 词卡 chips */
+    .word-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .word-chip {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+      line-height: 1.3;
+    }
+    .word-chip:hover {
+      background: var(--indigo-pale);
+      border-color: var(--border-indigo);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(79,70,229,0.15);
+    }
+    .mnode.r-node .word-chip:hover,
+    .mnode.r-head .word-chip:hover {
+      background: var(--teal-pale);
+      border-color: var(--border-teal);
+      box-shadow: 0 4px 10px rgba(13,148,136,0.15);
+    }
+    .word-chip .wc-en {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--indigo);
+    }
+    .mnode.r-node .word-chip .wc-en,
+    .mnode.r-head .word-chip .wc-en {
+      color: var(--teal);
+    }
+    .word-chip .wc-zh {
+      font-size: 10.5px;
+      color: var(--muted);
+      font-weight: 400;
     }
 
     /* ── 明细区 ── */
@@ -635,11 +684,68 @@ const WORD_DB = {
 };
 
 const ROOT_FAMILY = {
-  text: ["context", "text", "textbook", "texture", "textile"],
-  port: ["transport", "import", "export", "portable"],
-  dict: ["predict", "dictionary", "dictate", "verdict"],
-  spect: ["inspect", "respect", "spectator", "spectacle"],
-  struct: ["construct", "structure", "instruction", "destruction"]
+  port:  [{w:"transport",zh:"运输"},{w:"import",zh:"进口"},{w:"export",zh:"出口"},{w:"portable",zh:"便携的"},{w:"report",zh:"报告"},{w:"support",zh:"支持"}],
+  dict:  [{w:"predict",zh:"预测"},{w:"dictionary",zh:"词典"},{w:"dictate",zh:"口述"},{w:"verdict",zh:"裁决"},{w:"contradict",zh:"矛盾"}],
+  vis:   [{w:"visible",zh:"可见的"},{w:"vision",zh:"视力"},{w:"revise",zh:"修改"},{w:"invisible",zh:"隐形的"},{w:"visual",zh:"视觉的"},{w:"visit",zh:"访问"}],
+  spect: [{w:"inspect",zh:"检查"},{w:"respect",zh:"尊重"},{w:"spectator",zh:"观众"},{w:"spectacle",zh:"奇观"},{w:"expect",zh:"期望"},{w:"aspect",zh:"方面"}],
+  tract: [{w:"attract",zh:"吸引"},{w:"contract",zh:"合同"},{w:"subtract",zh:"减去"},{w:"extract",zh:"提取"},{w:"distract",zh:"分心"},{w:"abstract",zh:"抽象"}],
+  scrib: [{w:"describe",zh:"描述"},{w:"prescribe",zh:"开处方"},{w:"subscribe",zh:"订阅"},{w:"manuscript",zh:"手稿"},{w:"inscribe",zh:"铭刻"}],
+  press: [{w:"compress",zh:"压缩"},{w:"express",zh:"表达"},{w:"impress",zh:"印象"},{w:"suppress",zh:"压制"},{w:"pressure",zh:"压力"},{w:"depress",zh:"压抑"}],
+  ject:  [{w:"project",zh:"项目"},{w:"reject",zh:"拒绝"},{w:"inject",zh:"注射"},{w:"object",zh:"对象"},{w:"subject",zh:"主题"},{w:"eject",zh:"弹出"}],
+  form:  [{w:"transform",zh:"转变"},{w:"uniform",zh:"制服"},{w:"reform",zh:"改革"},{w:"inform",zh:"通知"},{w:"perform",zh:"执行"},{w:"conform",zh:"符合"}],
+  rupt:  [{w:"interrupt",zh:"打断"},{w:"erupt",zh:"爆发"},{w:"disrupt",zh:"扰乱"},{w:"corrupt",zh:"腐败"},{w:"bankrupt",zh:"破产"},{w:"abrupt",zh:"突然的"}],
+  ceed:  [{w:"proceed",zh:"继续"},{w:"succeed",zh:"成功"},{w:"exceed",zh:"超过"},{w:"speed",zh:"速度"}],
+  gress: [{w:"progress",zh:"进步"},{w:"regress",zh:"退步"},{w:"congress",zh:"国会"},{w:"aggressive",zh:"积极进取"},{w:"digress",zh:"离题"}],
+  text:  [{w:"context",zh:"语境"},{w:"text",zh:"文本"},{w:"texture",zh:"质感"},{w:"textile",zh:"纺织品"},{w:"textbook",zh:"教科书"}],
+  struct:[{w:"construct",zh:"构建"},{w:"structure",zh:"结构"},{w:"instruct",zh:"指导"},{w:"destruction",zh:"破坏"},{w:"instruction",zh:"说明"},{w:"reconstruct",zh:"重建"}],
+  duc:   [{w:"produce",zh:"生产"},{w:"conduct",zh:"行为"},{w:"educate",zh:"教育"},{w:"reduce",zh:"减少"},{w:"introduce",zh:"介绍"},{w:"deduce",zh:"推断"}],
+  pos:   [{w:"position",zh:"位置"},{w:"compose",zh:"构成"},{w:"deposit",zh:"存款"},{w:"propose",zh:"提议"},{w:"expose",zh:"暴露"},{w:"oppose",zh:"反对"}],
+  mit:   [{w:"submit",zh:"提交"},{w:"permit",zh:"允许"},{w:"commit",zh:"承诺"},{w:"admit",zh:"承认"},{w:"transmit",zh:"传输"},{w:"emit",zh:"发射"}],
+  ven:   [{w:"prevent",zh:"阻止"},{w:"event",zh:"事件"},{w:"convention",zh:"惯例"},{w:"adventure",zh:"冒险"},{w:"invent",zh:"发明"},{w:"revenue",zh:"收入"}],
+  cap:   [{w:"capture",zh:"捕获"},{w:"accept",zh:"接受"},{w:"capable",zh:"有能力的"},{w:"escape",zh:"逃脱"},{w:"capacity",zh:"容量"},{w:"captive",zh:"俘虏"}],
+  fac:   [{w:"factory",zh:"工厂"},{w:"factor",zh:"因素"},{w:"manufacture",zh:"制造"},{w:"fact",zh:"事实"},{w:"facilitate",zh:"促进"},{w:"surface",zh:"表面"}],
+};
+
+const PREFIX_FAMILY = {
+  un:    [{w:"unhappy",zh:"不开心"},{w:"unfair",zh:"不公平"},{w:"unable",zh:"无法"},{w:"unknown",zh:"未知"},{w:"unusual",zh:"不寻常"},{w:"unlock",zh:"解锁"}],
+  in:    [{w:"invisible",zh:"隐形"},{w:"inactive",zh:"不活跃"},{w:"incomplete",zh:"不完整"},{w:"incorrect",zh:"不正确"},{w:"indirect",zh:"间接的"}],
+  im:    [{w:"impossible",zh:"不可能"},{w:"impolite",zh:"不礼貌"},{w:"impress",zh:"印象"},{w:"improve",zh:"改善"},{w:"import",zh:"进口"}],
+  dis:   [{w:"disagree",zh:"不同意"},{w:"discover",zh:"发现"},{w:"discuss",zh:"讨论"},{w:"disappear",zh:"消失"},{w:"disrupt",zh:"扰乱"},{w:"dismiss",zh:"解散"}],
+  re:    [{w:"return",zh:"返回"},{w:"review",zh:"复习"},{w:"rebuild",zh:"重建"},{w:"replace",zh:"替换"},{w:"reject",zh:"拒绝"},{w:"remind",zh:"提醒"}],
+  pre:   [{w:"predict",zh:"预测"},{w:"prepare",zh:"准备"},{w:"prevent",zh:"预防"},{w:"preview",zh:"预览"},{w:"prefix",zh:"前缀"},{w:"prefer",zh:"偏好"}],
+  pro:   [{w:"progress",zh:"进步"},{w:"project",zh:"项目"},{w:"produce",zh:"生产"},{w:"promote",zh:"提升"},{w:"protect",zh:"保护"},{w:"propose",zh:"提议"}],
+  sub:   [{w:"submit",zh:"提交"},{w:"subject",zh:"主题"},{w:"subtract",zh:"减去"},{w:"subway",zh:"地铁"},{w:"subscribe",zh:"订阅"},{w:"suburb",zh:"郊区"}],
+  trans: [{w:"transport",zh:"运输"},{w:"transform",zh:"转变"},{w:"transfer",zh:"转让"},{w:"translate",zh:"翻译"},{w:"transmit",zh:"传输"},{w:"transparent",zh:"透明"}],
+  inter: [{w:"interrupt",zh:"打断"},{w:"interact",zh:"互动"},{w:"interview",zh:"采访"},{w:"international",zh:"国际"},{w:"interpret",zh:"解释"}],
+  anti:  [{w:"antibiotic",zh:"抗生素"},{w:"antisocial",zh:"反社会"},{w:"antivirus",zh:"杀毒软件"},{w:"anticipate",zh:"预期"}],
+  con:   [{w:"context",zh:"语境"},{w:"construct",zh:"构建"},{w:"conduct",zh:"行为"},{w:"confirm",zh:"确认"},{w:"contact",zh:"联系"},{w:"connect",zh:"连接"}],
+  ex:    [{w:"export",zh:"出口"},{w:"express",zh:"表达"},{w:"extract",zh:"提取"},{w:"expose",zh:"暴露"},{w:"extend",zh:"延伸"},{w:"expect",zh:"期望"}],
+  de:    [{w:"describe",zh:"描述"},{w:"develop",zh:"发展"},{w:"deposit",zh:"存款"},{w:"decrease",zh:"减少"},{w:"destroy",zh:"破坏"},{w:"deduce",zh:"推断"}],
+  over:  [{w:"overcome",zh:"克服"},{w:"overlook",zh:"忽视"},{w:"overload",zh:"超载"},{w:"overhear",zh:"偷听"},{w:"overflow",zh:"溢出"}],
+  under: [{w:"understand",zh:"理解"},{w:"underwater",zh:"水下"},{w:"underline",zh:"下划线"},{w:"undergraduate",zh:"本科生"},{w:"underestimate",zh:"低估"}],
+  mis:   [{w:"mistake",zh:"错误"},{w:"misuse",zh:"滥用"},{w:"misunderstand",zh:"误解"},{w:"mislead",zh:"误导"},{w:"misspell",zh:"拼错"}],
+  out:   [{w:"outcome",zh:"结果"},{w:"output",zh:"输出"},{w:"outdoor",zh:"户外"},{w:"outline",zh:"轮廓"},{w:"outperform",zh:"超越"},{w:"outstanding",zh:"杰出"}],
+};
+
+const SUFFIX_FAMILY = {
+  tion:  [{w:"action",zh:"行动"},{w:"nation",zh:"国家"},{w:"solution",zh:"解决方案"},{w:"education",zh:"教育"},{w:"attention",zh:"注意"},{w:"question",zh:"问题"}],
+  sion:  [{w:"vision",zh:"视力"},{w:"mission",zh:"使命"},{w:"passion",zh:"热情"},{w:"decision",zh:"决定"},{w:"version",zh:"版本"},{w:"tension",zh:"紧张"}],
+  ment:  [{w:"movement",zh:"运动"},{w:"agreement",zh:"协议"},{w:"environment",zh:"环境"},{w:"management",zh:"管理"},{w:"development",zh:"发展"},{w:"argument",zh:"争论"}],
+  ness:  [{w:"happiness",zh:"幸福"},{w:"kindness",zh:"善良"},{w:"darkness",zh:"黑暗"},{w:"weakness",zh:"弱点"},{w:"awareness",zh:"意识"},{w:"fitness",zh:"健康"}],
+  ity:   [{w:"ability",zh:"能力"},{w:"quality",zh:"质量"},{w:"activity",zh:"活动"},{w:"community",zh:"社区"},{w:"creativity",zh:"创造力"},{w:"reality",zh:"现实"}],
+  able:  [{w:"capable",zh:"有能力的"},{w:"reliable",zh:"可靠的"},{w:"comfortable",zh:"舒适的"},{w:"valuable",zh:"有价值的"},{w:"suitable",zh:"合适的"},{w:"favorable",zh:"有利的"}],
+  ible:  [{w:"visible",zh:"可见的"},{w:"possible",zh:"可能的"},{w:"flexible",zh:"灵活的"},{w:"responsible",zh:"负责任的"},{w:"accessible",zh:"可访问的"}],
+  ful:   [{w:"beautiful",zh:"美丽"},{w:"helpful",zh:"有帮助"},{w:"powerful",zh:"强大"},{w:"successful",zh:"成功的"},{w:"careful",zh:"小心"},{w:"grateful",zh:"感激"}],
+  less:  [{w:"hopeless",zh:"无望"},{w:"useless",zh:"无用"},{w:"careless",zh:"粗心"},{w:"homeless",zh:"无家可归"},{w:"endless",zh:"无尽"},{w:"harmless",zh:"无害"}],
+  ous:   [{w:"famous",zh:"著名"},{w:"serious",zh:"严肃"},{w:"nervous",zh:"紧张"},{w:"dangerous",zh:"危险"},{w:"various",zh:"多样"},{w:"generous",zh:"慷慨"}],
+  ive:   [{w:"active",zh:"积极"},{w:"creative",zh:"有创意"},{w:"positive",zh:"积极的"},{w:"effective",zh:"有效的"},{w:"attractive",zh:"吸引人"},{w:"native",zh:"本地的"}],
+  er:    [{w:"teacher",zh:"老师"},{w:"player",zh:"玩家"},{w:"worker",zh:"工人"},{w:"leader",zh:"领导"},{w:"manager",zh:"经理"},{w:"writer",zh:"作者"}],
+  ist:   [{w:"artist",zh:"艺术家"},{w:"scientist",zh:"科学家"},{w:"novelist",zh:"小说家"},{w:"specialist",zh:"专家"},{w:"tourist",zh:"游客"}],
+  ize:   [{w:"realize",zh:"意识到"},{w:"organize",zh:"组织"},{w:"recognize",zh:"认识"},{w:"customize",zh:"定制"},{w:"optimize",zh:"优化"},{w:"memorize",zh:"记忆"}],
+  ify:   [{w:"identify",zh:"识别"},{w:"justify",zh:"证明"},{w:"simplify",zh:"简化"},{w:"classify",zh:"分类"},{w:"modify",zh:"修改"},{w:"satisfy",zh:"满足"}],
+  ly:    [{w:"quickly",zh:"快速地"},{w:"slowly",zh:"缓慢地"},{w:"carefully",zh:"仔细地"},{w:"finally",zh:"最终"},{w:"clearly",zh:"清楚地"},{w:"strongly",zh:"强烈地"}],
+  al:    [{w:"natural",zh:"自然的"},{w:"personal",zh:"个人的"},{w:"cultural",zh:"文化的"},{w:"central",zh:"中心的"},{w:"general",zh:"普通的"},{w:"original",zh:"原始的"}],
+  ic:    [{w:"basic",zh:"基础的"},{w:"classic",zh:"经典"},{w:"specific",zh:"具体的"},{w:"dramatic",zh:"戏剧性的"},{w:"fantastic",zh:"极好的"},{w:"historic",zh:"历史性的"}],
 };
 
 /* ───── 分析逻辑 ───── */
@@ -780,27 +886,51 @@ function renderMeaning({ word, info }) {
   `;
 }
 
-function renderExpansion(title, sub, items) {
+function renderExpansion(title, sub, items, words) {
   const panel = document.getElementById("expandPanel");
+  let body = "";
+  if (words && words.length) {
+    const chips = words.map(wObj =>
+      `<button class="word-chip" data-goto="${wObj.w}" title="${wObj.zh || wObj.w}">
+        <span class="wc-en">${wObj.w}</span>
+        ${wObj.zh ? `<span class="wc-zh">${wObj.zh}</span>` : ""}
+      </button>`
+    ).join("");
+    body = `<div class="word-chips" style="margin-bottom:10px">${chips}</div>`;
+  }
   const list = items.map(item => `<li>${item}</li>`).join("");
   panel.innerHTML = `
     <div class="expand-title">${title}</div>
     <div class="expand-sub">${sub}</div>
+    ${body}
     <ul class="expand-list">${list}</ul>
   `;
+  panel.querySelectorAll(".word-chip[data-goto]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.getElementById("wordInput").value = btn.dataset.goto;
+      run();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
 }
 
 function getExpansionContent(key, data) {
   const { word, hits, info } = data;
   if (key === "left-overview") {
+    const allRootWords = hits
+      .filter(h => h.type === "词根")
+      .flatMap(h => ROOT_FAMILY[h.part] || [])
+      .filter(w => w.w !== word)
+      .slice(0, 8);
     return {
       title: "词根词缀路径：整体策略",
-      sub: "先拆结构，再还原词义。",
+      sub: "先拆结构，再还原词义。点击单词直接学习。",
+      words: allRootWords.length ? allRootWords : null,
       items: [
         "先看前缀：判断方向、否定、时间等语义。",
         "再抓词根：它通常承载核心含义。",
         "最后看后缀：确认词性（名词/形容词/动词）。",
-        `应用到 "${word}"：优先记住“核心词根 + 场景”。`
+        `应用到 "${word}"：优先记住"核心词根 + 场景"。`
       ]
     };
   }
@@ -831,14 +961,13 @@ function getExpansionContent(key, data) {
   if (key.startsWith("prefix:")) {
     const part = key.split(":")[1];
     const p = PREFIXES.find(x => x.part === part);
-    const sibling = PREFIXES.filter(x => x.part !== part).slice(0, 3).map(x => x.part).join(" / ");
+    const family = (PREFIX_FAMILY[part] || []).filter(w => w.w !== word);
     return {
-      title: `前缀 ${part} 的进一步联想`,
-      sub: p ? `核心语义：${p.zh}` : "常见前缀扩展",
+      title: `前缀 "${part}－" 同族单词`,
+      sub: p ? `${p.zh}（${p.cue}）· 点击单词直接学习` : "点击单词直接学习",
+      words: family.length ? family : null,
       items: [
         p ? `记忆提示：${p.cue}` : "先判断该前缀是否有方向或否定意义。",
-        `同类前缀可对照记：${sibling}`,
-        `造句建议：用 "${part}" 开头再找两个词做并列记忆。`,
         `回到 "${word}"：把前缀含义先说出来，再接词根解释。`
       ]
     };
@@ -846,14 +975,15 @@ function getExpansionContent(key, data) {
   if (key.startsWith("root:")) {
     const part = key.split(":")[1];
     const r = ROOTS.find(x => x.part === part);
-    const family = ROOT_FAMILY[part] || (r?.sample ? r.sample.split(",").map(s => s.trim()) : []);
+    const family = (ROOT_FAMILY[part] || (r && r.sample
+      ? r.sample.split(",").map(s => ({ w: s.trim(), zh: "" }))
+      : [])).filter(w => w.w !== word);
     return {
-      title: `词根 ${part} 的词族联想`,
-      sub: r ? `核心语义：${r.zh}` : "词根扩展",
+      title: `词根 "－${part}－" 词族单词`,
+      sub: r ? `核心语义：${r.zh} · 点击单词直接学习` : "点击单词直接学习",
+      words: family.length ? family : null,
       items: [
-        `词族示例：${family.join(" / ") || "可补充更多同根词"}`,
-        `记忆方法：固定“词根 = ${r ? r.zh : "核心动作"}”这条映射。`,
-        "每天挑 2 个同根词做对比，速度会很快提升。",
+        `记忆方法：固定"词根 = ${r ? r.zh : "核心动作"}"这条映射。`,
         `把 "${part}" 放回 "${word}" 再复述一遍完整词义。`
       ]
     };
@@ -861,13 +991,13 @@ function getExpansionContent(key, data) {
   if (key.startsWith("suffix:")) {
     const part = key.split(":")[1];
     const s = SUFFIXES.find(x => x.part === part);
+    const family = (SUFFIX_FAMILY[part] || []).filter(w => w.w !== word);
     return {
-      title: `后缀 ${part} 的词性联想`,
-      sub: s ? `常见作用：${s.zh}` : "后缀扩展",
+      title: `后缀 "－${part}" 同族单词`,
+      sub: s ? `${s.zh}（${s.cue}）· 点击单词直接学习` : "点击单词直接学习",
+      words: family.length ? family : null,
       items: [
-        s ? `记忆提示：${s.cue}` : "先看这个后缀偏向哪类词性。",
-        "后缀主要用于“确认词性”，不一定决定核心意义。",
-        "学习时可建立：后缀 -> 词性 的速查表。",
+        "后缀主要用于「确认词性」，不一定决定核心意义。",
         `在 "${word}" 中，先抓词根义，再用后缀确认词性。`
       ]
     };
@@ -878,7 +1008,7 @@ function getExpansionContent(key, data) {
       sub: "把解释压缩成一个最小记忆单元。",
       items: [
         `核心释义：${info.zh}`,
-        "用“谁 + 做什么”改写成自己的口语句。",
+        "用「谁 + 做什么」改写成自己的口语句。",
         `近义替换法：给 "${word}" 找 1-2 个中文近义词。`,
         "复习时优先回忆这条最短释义。"
       ]
@@ -891,8 +1021,8 @@ function getExpansionContent(key, data) {
       items: [
         `当前联想：${info.memory}`,
         "把联想改写成第一人称，更容易记住。",
-        "如果联想太长，保留“前缀 + 词根 + 结果”三段即可。",
-        `连续复述 3 次：看到 "${word}" -> 立刻说出联想。`
+        "如果联想太长，保留「前缀 + 词根 + 结果」三段即可。",
+        `连续复述 3 次：看到 "${word}" → 立刻说出联想。`
       ]
     };
   }
@@ -929,6 +1059,7 @@ function getExpansionContent(key, data) {
 
 function bindNodeExpansion(data) {
   const nodes = document.querySelectorAll("#mindmapStage .mnode");
+
   const collapseAllInline = () => {
     nodes.forEach(n => {
       n.classList.remove("expanded");
@@ -940,12 +1071,35 @@ function bindNodeExpansion(data) {
 
   const mountInlineExpand = (node, content) => {
     const child = document.createElement("div");
-    const shortItems = content.items.slice(0, 3).map(item => `<li>${item}</li>`).join("");
     child.className = "node-children";
-    child.innerHTML = `
-      <div class="node-children-title">继续联想</div>
-      <ul>${shortItems}</ul>
-    `;
+
+    let inner = `<div class="node-children-title">${content.words ? "同族单词 · 点击学习" : "继续联想"}</div>`;
+
+    if (content.words && content.words.length) {
+      const chips = content.words.map(wObj =>
+        `<button class="word-chip" data-goto="${wObj.w}" title="${wObj.zh || wObj.w}">
+          <span class="wc-en">${wObj.w}</span>
+          ${wObj.zh ? `<span class="wc-zh">${wObj.zh}</span>` : ""}
+        </button>`
+      ).join("");
+      inner += `<div class="word-chips">${chips}</div>`;
+    } else {
+      const shortItems = content.items.slice(0, 2).map(item => `<li>${item}</li>`).join("");
+      inner += `<ul>${shortItems}</ul>`;
+    }
+
+    child.innerHTML = inner;
+
+    child.querySelectorAll(".word-chip[data-goto]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const target = btn.dataset.goto;
+        document.getElementById("wordInput").value = target;
+        run();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
     node.appendChild(child);
     node.classList.add("expanded");
     node.setAttribute("aria-expanded", "true");
@@ -958,7 +1112,7 @@ function bindNodeExpansion(data) {
       node.classList.add("active");
       const key = node.dataset.expandKey || "";
       const content = getExpansionContent(key, data);
-      renderExpansion(content.title, content.sub, content.items);
+      renderExpansion(content.title, content.sub, content.items, content.words);
 
       const alreadyExpanded = node.classList.contains("expanded");
       collapseAllInline();
