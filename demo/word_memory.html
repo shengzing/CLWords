@@ -279,6 +279,19 @@
       cursor: pointer;
       overflow: hidden;
     }
+    .mnode::after {
+      content: "▸";
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.65;
+      transition: transform 0.2s ease;
+    }
+    .mnode.expanded::after {
+      transform: rotate(90deg);
+    }
     .mnode:hover { transform: translateY(-2px); }
     .mnode:focus-visible {
       outline: 2px solid var(--indigo);
@@ -919,6 +932,7 @@ function bindNodeExpansion(data) {
   const collapseAllInline = () => {
     nodes.forEach(n => {
       n.classList.remove("expanded");
+      n.setAttribute("aria-expanded", "false");
       const child = n.querySelector(".node-children");
       if (child) child.remove();
     });
@@ -934,9 +948,11 @@ function bindNodeExpansion(data) {
     `;
     node.appendChild(child);
     node.classList.add("expanded");
+    node.setAttribute("aria-expanded", "true");
   };
 
   nodes.forEach(node => {
+    node.setAttribute("aria-expanded", "false");
     node.addEventListener("click", () => {
       nodes.forEach(n => n.classList.remove("active"));
       node.classList.add("active");
@@ -944,17 +960,12 @@ function bindNodeExpansion(data) {
       const content = getExpansionContent(key, data);
       renderExpansion(content.title, content.sub, content.items);
 
-      if (node.dataset.subnode === "1") {
-        const alreadyExpanded = node.classList.contains("expanded");
-        collapseAllInline();
-        if (!alreadyExpanded) {
-          mountInlineExpand(node, content);
-        }
-        requestAnimationFrame(() => drawLines());
-      } else {
-        collapseAllInline();
-        requestAnimationFrame(() => drawLines());
+      const alreadyExpanded = node.classList.contains("expanded");
+      collapseAllInline();
+      if (!alreadyExpanded) {
+        mountInlineExpand(node, content);
       }
+      requestAnimationFrame(() => drawLines());
     });
     node.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
